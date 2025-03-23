@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: jump
+spec:
+  containers:
+  - name: ssh
+    image: docker.io/linuxserver/openssh-server
+    env:
+    - name: USER_NAME
+      value: test
+    - name: USER_PASSWORD
+      value: test
+    - name: PASSWORD_ACCESS
+      value: "true"
+    - name: LOG_STDOUT
+      value: "true"
+    - name: DOCKER_MODS
+      value: linuxserver/mods:openssh-server-ssh-tunnel
