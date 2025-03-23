@@ -4,10 +4,11 @@ import (
 	"context"
 	"fmt"
 	"io"
-	pipelistener "kube-proxy/pkg/listener"
 	"log"
 	"net"
 	"net/http"
+
+	pipelistener "github.com/kaedwen/kube-proxy/pkg/listener"
 
 	"golang.org/x/crypto/ssh"
 )

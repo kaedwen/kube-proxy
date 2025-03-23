@@ -3,9 +3,10 @@ package pod
 import (
 	"context"
 	"fmt"
-	"kube-proxy/pkg/resources"
 	"log"
 	"time"
+
+	"github.com/kaedwen/kube-proxy/pkg/resources"
 
 	"github.com/google/uuid"
 	corev1 "k8s.io/api/core/v1"

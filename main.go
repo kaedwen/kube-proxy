@@ -2,14 +2,15 @@ package main
 
 import (
 	"context"
-	utils "kube-proxy/pkg"
-	"kube-proxy/pkg/proxy"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	utils "github.com/kaedwen/kube-proxy/pkg"
+	"github.com/kaedwen/kube-proxy/pkg/proxy"
 )
 
 func main() {

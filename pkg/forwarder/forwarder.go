@@ -3,13 +3,14 @@ package forwarder
 import (
 	"context"
 	"fmt"
-	utils "kube-proxy/pkg"
-	"kube-proxy/pkg/pod"
 	"log"
 	"net/http"
 	"os"
 	"path"
 	"time"
+
+	utils "github.com/kaedwen/kube-proxy/pkg"
+	"github.com/kaedwen/kube-proxy/pkg/pod"
 
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"

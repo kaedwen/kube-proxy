@@ -3,12 +3,13 @@ package proxy
 import (
 	"context"
 	"errors"
-	"kube-proxy/pkg/forwarder"
-	"kube-proxy/pkg/handler"
-	"kube-proxy/pkg/pod"
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/kaedwen/kube-proxy/pkg/forwarder"
+	"github.com/kaedwen/kube-proxy/pkg/handler"
+	"github.com/kaedwen/kube-proxy/pkg/pod"
 
 	"k8s.io/client-go/rest"
 )

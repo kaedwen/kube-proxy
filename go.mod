@@ -1,4 +1,4 @@
-module kube-proxy
+module github.com/kaedwen/kube-proxy
 
 go 1.24.1
 
