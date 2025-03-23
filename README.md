@@ -10,7 +10,7 @@ This project can help to proxy dynamic endpoints from a cluster to a local liste
 	})
 
 	p := proxy.New(mux)
-    if err := p.Run(context.Background(), cfg, "default"); err != nil {
+	if err := p.Run(context.Background(), cfg, "default"); err != nil {
 		panic(err)
 	}
 ```
