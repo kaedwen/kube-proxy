@@ -39,7 +39,7 @@ func main() {
 	ctx, cancel = context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	if err := p.Cleanup(ctx); err != nil {
+	if err := p.Teardown(ctx); err != nil {
 		log.Println("failed to cleanup", err.Error())
 	}
 }
