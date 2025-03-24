@@ -18,18 +18,32 @@ import (
 	"k8s.io/client-go/rest"
 )
 
+const (
+	prefix = "kube-proxy: "
+)
+
 type KubeProxy struct {
-	mux *http.ServeMux
 	log *log.Logger
+	hnd *handler.Handler
 	ph  *pod.Handler
 }
 
-func New(mux *http.ServeMux) *KubeProxy {
-	return &KubeProxy{mux: mux, log: log.New(os.Stdout, "kube-proxy", 0)}
+func New(options ...ProxyPotion) *KubeProxy {
+	// create default logger
+	log := log.New(os.Stdout, prefix, 0)
+
+	p := &KubeProxy{log: log, hnd: handler.New(log), ph: nil}
+
+	// apply the options
+	for _, opt := range options {
+		opt(p)
+	}
+
+	return p
 }
 
-func NewWithLoggerOutput(w io.Writer, mux *http.ServeMux) *KubeProxy {
-	return &KubeProxy{mux: mux, log: log.New(w, "kube-proxy", 0)}
+func (p *KubeProxy) SetMux(mux *http.ServeMux) {
+	p.hnd.SetMux(mux)
 }
 
 func (p *KubeProxy) Run(ctx context.Context, cfg *rest.Config, namespace string, remoteport string) error {
@@ -55,8 +69,7 @@ func (p *KubeProxy) Run(ctx context.Context, cfg *rest.Config, namespace string,
 		return err
 	}
 
-	hnd := handler.New(p.log, p.mux)
-	if err := hnd.Run(ctx, strconv.Itoa(port), remoteport); err != nil {
+	if err := p.hnd.Run(ctx, strconv.Itoa(port), remoteport); err != nil {
 		return err
 	}
 
@@ -77,4 +90,18 @@ func (p *KubeProxy) Cleanup(ctx context.Context) error {
 
 func (p *KubeProxy) Teardown() {
 	p.ph.Delete(context.Background())
+}
+
+type ProxyPotion func(p *KubeProxy)
+
+func WithMux(mux *http.ServeMux) ProxyPotion {
+	return func(p *KubeProxy) {
+		p.hnd.SetMux(mux)
+	}
+}
+
+func WithLoggerOutput(w io.Writer) ProxyPotion {
+	return func(p *KubeProxy) {
+		p.log.SetOutput(w)
+	}
 }

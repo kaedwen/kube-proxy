@@ -15,11 +15,15 @@ import (
 
 type Handler struct {
 	log *log.Logger
-	mux *http.ServeMux
+	srv *http.Server
 }
 
-func New(log *log.Logger, m *http.ServeMux) *Handler {
-	return &Handler{log, m}
+func New(log *log.Logger) *Handler {
+	return &Handler{log, &http.Server{}}
+}
+
+func (h *Handler) SetMux(m *http.ServeMux) {
+	h.srv.Handler = m
 }
 
 func (h *Handler) Run(ctx context.Context, localhost string, remoteport string) error {
@@ -39,13 +43,9 @@ func (h *Handler) Run(ctx context.Context, localhost string, remoteport string) 
 		return fmt.Errorf("listen open port ON remote server error - %w", err)
 	}
 
-	srv := &http.Server{
-		Handler: h.mux,
-	}
-
 	pl := pipelistener.New()
 	go func() {
-		if err := srv.Serve(pl); err != nil {
+		if err := h.srv.Serve(pl); err != nil {
 			panic(err)
 		}
 	}()

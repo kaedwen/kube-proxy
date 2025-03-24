@@ -22,10 +22,10 @@ func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(200)
-		w.Write([]byte("yehaa\n"))
+		w.Write([]byte("yehaa 1\n"))
 	})
 
-	p := proxy.New(mux)
+	p := proxy.New(proxy.WithMux(mux))
 	if err := p.Run(ctx, cfg, "default", "8080"); err != nil {
 		panic(err)
 	}
