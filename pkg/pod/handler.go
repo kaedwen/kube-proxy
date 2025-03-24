@@ -16,17 +16,18 @@ import (
 )
 
 type Handler struct {
+	log       *log.Logger
 	client    *kubernetes.Clientset
 	namespace string
 	target    *corev1.Pod
 }
 
-func New(cfg *rest.Config, namespace string) (*Handler, error) {
+func New(log *log.Logger, cfg *rest.Config, namespace string) (*Handler, error) {
 	client, err := kubernetes.NewForConfig(cfg)
 	if err != nil {
 		return nil, err
 	}
-	return &Handler{client, namespace, nil}, nil
+	return &Handler{log, client, namespace, nil}, nil
 }
 
 func (ph *Handler) Start(ctx context.Context) error {
@@ -57,13 +58,13 @@ func (ph *Handler) Start(ctx context.Context) error {
 		}
 	}
 
-	fmt.Printf("pod started - %s/%s\n", ph.Namespace(), ph.Name())
+	ph.log.Printf("pod started - %s/%s\n", ph.Namespace(), ph.Name())
 
 	return nil
 }
 
 func (ph *Handler) Delete(ctx context.Context) error {
-	log.Println("deleting jump pod")
+	ph.log.Println("deleting jump pod")
 	return ph.client.CoreV1().Pods(ph.namespace).Delete(ctx, ph.target.Name, v1.DeleteOptions{})
 }
 

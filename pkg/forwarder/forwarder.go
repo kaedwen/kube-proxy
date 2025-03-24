@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 	"path"
 	"time"
 
@@ -19,14 +18,16 @@ import (
 )
 
 type Forwarder struct {
+	log          *log.Logger
 	cfg          *rest.Config
 	ns           string
 	stopChannel  chan struct{}
 	readyChannel chan struct{}
 }
 
-func New(cfg *rest.Config, ns string) *Forwarder {
+func New(log *log.Logger, cfg *rest.Config, ns string) *Forwarder {
 	return &Forwarder{
+		log:          log,
 		cfg:          cfg,
 		ns:           ns,
 		stopChannel:  make(chan struct{}),
@@ -58,7 +59,7 @@ func (f *Forwarder) Run(ctx context.Context, ph *pod.Handler) (int, error) {
 		panic(err)
 	}
 
-	fmt.Println(targetURL.String())
+	f.log.Println(targetURL.String())
 
 	p, err := utils.GetFreePort()
 	if err != nil {
@@ -67,14 +68,14 @@ func (f *Forwarder) Run(ctx context.Context, ph *pod.Handler) (int, error) {
 
 	dialer := spdy.NewDialer(upgrader, &http.Client{Transport: transport}, http.MethodPost, targetURL)
 
-	pf, err := portforward.NewOnAddresses(dialer, []string{"0.0.0.0"}, []string{fmt.Sprintf("%d:2222", p)}, f.stopChannel, f.readyChannel, os.Stdout, os.Stderr)
+	pf, err := portforward.NewOnAddresses(dialer, []string{"0.0.0.0"}, []string{fmt.Sprintf("%d:2222", p)}, f.stopChannel, f.readyChannel, f.log.Writer(), f.log.Writer())
 	if err != nil {
 		return 0, err
 	}
 
 	go func() {
 		if err := pf.ForwardPorts(); err != nil {
-			log.Println("forward", err)
+			f.log.Println("forward", err)
 		}
 	}()
 
@@ -83,7 +84,7 @@ func (f *Forwarder) Run(ctx context.Context, ph *pod.Handler) (int, error) {
 	go func() {
 		<-ctx.Done()
 		<-time.After(5 * time.Second)
-		log.Println("stopping forwarder")
+		f.log.Println("stopping forwarder")
 		close(f.stopChannel)
 		pf.Close()
 	}()

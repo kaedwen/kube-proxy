@@ -14,11 +14,12 @@ import (
 )
 
 type Handler struct {
+	log *log.Logger
 	mux *http.ServeMux
 }
 
-func New(m *http.ServeMux) *Handler {
-	return &Handler{m}
+func New(log *log.Logger, m *http.ServeMux) *Handler {
+	return &Handler{log, m}
 }
 
 func (h *Handler) Run(ctx context.Context, localhost string, remoteport string) error {
@@ -61,16 +62,16 @@ func (h *Handler) Run(ctx context.Context, localhost string, remoteport string) 
 				continue
 			}
 
-			log.Println("handling new connection")
+			h.log.Println("handling new connection")
 			if err := pl.ServeConn(client); err != nil {
-				log.Printf("failed to serve conn - %s", err.Error())
+				h.log.Printf("failed to serve conn - %s", err.Error())
 			}
 		}
 	}()
 
 	go func() {
 		<-ctx.Done()
-		log.Println("stopping remote listener")
+		h.log.Println("stopping remote listener")
 		remoteListener.Close()
 	}()
 

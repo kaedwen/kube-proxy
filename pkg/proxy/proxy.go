@@ -4,7 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
+	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 
@@ -17,11 +20,16 @@ import (
 
 type KubeProxy struct {
 	mux *http.ServeMux
+	log *log.Logger
 	ph  *pod.Handler
 }
 
 func New(mux *http.ServeMux) *KubeProxy {
-	return &KubeProxy{mux: mux}
+	return &KubeProxy{mux: mux, log: log.New(os.Stdout, "kube-proxy", 0)}
+}
+
+func NewWithLoggerOutput(w io.Writer, mux *http.ServeMux) *KubeProxy {
+	return &KubeProxy{mux: mux, log: log.New(w, "kube-proxy", 0)}
 }
 
 func (p *KubeProxy) Run(ctx context.Context, cfg *rest.Config, namespace string, remoteport string) error {
@@ -30,7 +38,7 @@ func (p *KubeProxy) Run(ctx context.Context, cfg *rest.Config, namespace string,
 	}
 
 	var err error
-	p.ph, err = pod.New(cfg, namespace)
+	p.ph, err = pod.New(p.log, cfg, namespace)
 	if err != nil {
 		return err
 	}
@@ -42,12 +50,12 @@ func (p *KubeProxy) Run(ctx context.Context, cfg *rest.Config, namespace string,
 	// wait before forwarder spin-up
 	<-time.After(5 * time.Second)
 
-	port, err := forwarder.New(cfg, namespace).Run(ctx, p.ph)
+	port, err := forwarder.New(p.log, cfg, namespace).Run(ctx, p.ph)
 	if err != nil {
 		return err
 	}
 
-	hnd := handler.New(p.mux)
+	hnd := handler.New(p.log, p.mux)
 	if err := hnd.Run(ctx, strconv.Itoa(port), remoteport); err != nil {
 		return err
 	}
