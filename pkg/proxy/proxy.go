@@ -3,6 +3,7 @@ package proxy
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -52,6 +53,14 @@ func (p *KubeProxy) Run(ctx context.Context, cfg *rest.Config, namespace string,
 	}
 
 	return nil
+}
+
+func (p *KubeProxy) Endpoint() string {
+	if p.ph == nil {
+		return ""
+	}
+
+	return fmt.Sprintf("%s.%s.pod.cluster.local", p.ph.Name(), p.ph.Namespace())
 }
 
 func (p *KubeProxy) Cleanup(ctx context.Context) error {
