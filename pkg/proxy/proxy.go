@@ -63,6 +63,10 @@ func (p *KubeProxy) Endpoint() string {
 	return fmt.Sprintf("%s.%s.pod.cluster.local", p.ph.Name(), p.ph.Namespace())
 }
 
-func (p *KubeProxy) Teardown(ctx context.Context) error {
+func (p *KubeProxy) Cleanup(ctx context.Context) error {
 	return p.ph.Delete(ctx)
+}
+
+func (p *KubeProxy) Teardown() {
+	p.ph.Delete(context.Background())
 }
