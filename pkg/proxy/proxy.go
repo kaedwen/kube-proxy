@@ -23,7 +23,7 @@ func New(mux *http.ServeMux) *KubeProxy {
 	return &KubeProxy{mux: mux}
 }
 
-func (p *KubeProxy) Run(ctx context.Context, cfg *rest.Config, namespace string) error {
+func (p *KubeProxy) Run(ctx context.Context, cfg *rest.Config, namespace string, remoteport string) error {
 	if p.ph != nil {
 		return errors.New("already running")
 	}
@@ -47,7 +47,7 @@ func (p *KubeProxy) Run(ctx context.Context, cfg *rest.Config, namespace string)
 	}
 
 	hnd := handler.New(p.mux)
-	if err := hnd.Run(ctx, strconv.Itoa(port)); err != nil {
+	if err := hnd.Run(ctx, strconv.Itoa(port), remoteport); err != nil {
 		return err
 	}
 

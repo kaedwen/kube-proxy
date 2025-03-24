@@ -21,19 +21,19 @@ func New(m *http.ServeMux) *Handler {
 	return &Handler{m}
 }
 
-func (h *Handler) Run(ctx context.Context, port string) error {
+func (h *Handler) Run(ctx context.Context, localhost string, remoteport string) error {
 	sshConfig := &ssh.ClientConfig{
 		User:            "test",
 		Auth:            []ssh.AuthMethod{ssh.Password("test")},
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
 
-	serverConn, err := ssh.Dial("tcp", net.JoinHostPort("127.0.0.1", port), sshConfig)
+	serverConn, err := ssh.Dial("tcp", net.JoinHostPort("127.0.0.1", localhost), sshConfig)
 	if err != nil {
 		return fmt.Errorf("dial INTO remote server error - %w", err)
 	}
 
-	remoteListener, err := serverConn.Listen("tcp", "0.0.0.0:8080")
+	remoteListener, err := serverConn.Listen("tcp", net.JoinHostPort("0.0.0.0", remoteport))
 	if err != nil {
 		return fmt.Errorf("listen open port ON remote server error - %w", err)
 	}

@@ -26,7 +26,7 @@ func main() {
 	})
 
 	p := proxy.New(mux)
-	if err := p.Run(ctx, cfg, "default"); err != nil {
+	if err := p.Run(ctx, cfg, "default", "8080"); err != nil {
 		panic(err)
 	}
 
