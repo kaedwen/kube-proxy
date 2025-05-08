@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"slices"
 	"time"
 
 	"github.com/kaedwen/kube-proxy/pkg/resources"
@@ -53,7 +54,13 @@ func (ph *Handler) Start(ctx context.Context) error {
 	for e := range w.ResultChan() {
 		if p, ok := e.Object.(*corev1.Pod); ok {
 			if p.Status.Phase == corev1.PodRunning {
-				w.Stop()
+				if idx := slices.IndexFunc(p.Status.Conditions, func(c corev1.PodCondition) bool {
+					return c.Type == corev1.ContainersReady
+				}); idx >= 0 {
+					if p.Status.Conditions[idx].Status == corev1.ConditionTrue {
+						w.Stop()
+					}
+				}
 			}
 		}
 	}

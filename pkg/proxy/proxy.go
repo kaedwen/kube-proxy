@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"time"
 
 	"github.com/kaedwen/kube-proxy/pkg/forwarder"
 	"github.com/kaedwen/kube-proxy/pkg/handler"
@@ -60,9 +59,6 @@ func (p *KubeProxy) Run(ctx context.Context, cfg *rest.Config, namespace string,
 	if err := p.ph.Start(ctx); err != nil {
 		return err
 	}
-
-	// wait before forwarder spin-up
-	<-time.After(5 * time.Second)
 
 	port, err := forwarder.New(p.log, cfg, namespace).Run(ctx, p.ph)
 	if err != nil {

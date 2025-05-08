@@ -56,7 +56,7 @@ func (f *Forwarder) Run(ctx context.Context, ph *pod.Handler) (int, error) {
 
 	transport, upgrader, err := spdy.RoundTripperFor(f.cfg)
 	if err != nil {
-		panic(err)
+		return 0, err
 	}
 
 	f.log.Println(targetURL.String())
